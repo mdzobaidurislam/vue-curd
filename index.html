@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Vue js</title>
+</head>
+<body>
+<div id="app">
+
+   <div class="container mt-5 mb-5">
+       <div class="row">
+           <div class="col-lg-12 mb-4"><h1 class="text-center">Vue Js Php CURD </h1></div>
+
+           <div class="alert alert-success" v-if="message">
+            <strong>Success!</strong> {{message}}
+          </div>
+          <div class="alert alert-danger" v-if="errormessage">
+            <strong>Error!</strong> {{errormessage}}
+          </div>
+
+
+           <div class="col-lg-12">
+               <h3 class="float-left">All User</h3>
+               <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addnewuser">
+                Add New User
+              </button>
+            <table class="table">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(user, name, index)  in users">
+                    <td>{{name+1}}</td>
+                    <td>{{user.name}}</td>
+                    <td>{{user.username}}</td>
+                    <td>{{user.email}}</td>
+                    <td>
+                        <button @click="edituser(user)" data-toggle="modal" data-target="#updateuser"  class="btn btn-info">Edit</button>
+                        <button @click="deleteuser(user.id)" class="btn btn-danger">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+           </div>
+
+       </div>
+   </div>
+   <!-- Button to Open the Modal -->
+
+  
+  <!-- Add user Modal start -->
+  <div class="modal" id="addnewuser">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Add New User </h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+            <form action="javascript:void()">
+                <div class="form-group">
+                  <label for="name">Name:{{form.name}}</label>
+                  <input type="text" v-model="form.name" class="form-control" placeholder="Enter name" id="name">
+                </div>
+                <div class="form-group">
+                  <label for="name">Username:{{form.username}}</label>
+                  <input type="text" v-model="form.username" class="form-control" placeholder="Enter username" id="username">
+                </div>
+                <div class="form-group">
+                  <label for="email">Email:{{form.email}}</label>
+                  <input type="email" v-model="form.email" class="form-control" placeholder="Enter email" id="email">
+                </div>
+                <button type="button" @click="addNewUser" data-dismiss="modal" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  <!-- Add user Modal end -->
+
+    <!-- Update user Modal start -->
+    <div class="modal" id="updateuser">
+        <div class="modal-dialog">
+          <div class="modal-content">
+      
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Update User </h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form action="javascript:void()">
+                    <div class="form-group">
+                      <label for="name">Name:{{updateUser.name}}</label>
+                      <input type="text" v-model="updateUser.name" class="form-control" placeholder="Enter name" id="name">
+                    </div>
+                    <div class="form-group">
+                      <label for="name">Username:{{updateUser.username}}</label>
+                      <input type="text" v-model="updateUser.username" class="form-control" placeholder="Enter username" id="username">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email:{{updateUser.email}}</label>
+                      <input type="email" v-model="updateUser.email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                    <button type="button" @click="updateUserData" data-dismiss="modal" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+      
+          </div>
+        </div>
+      </div>
+      <!-- update user Modal end -->
+    
+</div>
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="./js/axios.min.js"></script>
+    <script src="./js/vue.js"></script>
+    <script>
+        let app = new Vue({
+            el:'#app',
+            data:{
+                users:{},
+                form:{
+                    name:null,
+                    username:null,
+                    email:null,
+                },
+                updateUser:{},
+                adduserModal:true,
+                message:null,
+                errormessage:null,
+            },
+            methods: {
+                getUsers:function(){
+                    axios.get('http://localhost/vuecurd/api.php?action=read')
+                    .then(function(respons){
+                        if(!respons.data.error){
+                            app.users = respons.data.users
+                        }else{
+                            app.message=respons.data.message
+                        }
+                       console.log(respons.data.users)
+                    })
+                },
+                addNewUser:function(){
+                    let formdata = this.toFormData(this.form)
+                    
+                    axios.post('http://localhost/vuecurd/api.php?action=create',formdata)
+                    .then(function(respons){
+                        if(!respons.data.error){
+                            app.form.name=null
+                            app.form.username=null
+                            app.form.email=null
+                            app.getUsers()
+                            app.message=respons.data.message
+                            app.errormessage=null
+                        }else{
+                            app.errormessage=respons.data.message
+                            app.message=null
+                        }
+                    })
+                },
+                edituser:function(user){
+                    this.updateUser = user
+                },
+                updateUserData:function(){
+                    let formdata = this.toFormData(this.updateUser)
+                    
+                    axios.post('http://localhost/vuecurd/api.php?action=update',formdata)
+                    .then(function(respons){
+                        if(!respons.data.error){
+                            app.getUsers()
+                            app.message=respons.data.message
+                            app.errormessage=null
+                        }else{
+                            app.errormessage=respons.data.message
+                            app.message=null
+                        }
+                    })
+                },
+                deleteuser:function(id){
+                    let formdata = this.toFormData({id:id})
+                    
+                    axios.post('http://localhost/vuecurd/api.php?action=delete',formdata)
+                    .then(function(respons){
+                        if(!respons.data.error){
+                            app.getUsers()
+                            app.message=respons.data.message
+                            app.errormessage=null
+                        }else{
+                            app.errormessage=respons.data.message
+                            app.message=null
+                        }
+                    })
+                },
+                toFormData:function(obj){
+                    let data = new FormData()
+                    for (let key in obj) {
+                        data.append(key,obj[key])
+                    }
+                    return data
+                }
+
+            },
+
+            mounted() {
+                this.getUsers()
+            },
+        })
+
+    </script>
+</body>
+</html>
